@@ -1,1 +1,2 @@
-token = '6796696901:AAH71FaomBGgl8-BeEMT3FIKbz5_cXBDBdI'
+token = '6039319685:AAFQMypcpMvtNdPAGAEI_RaUX1_scb-ZrOk'
+base_url = "http://localhost:8080/api/bot/"
