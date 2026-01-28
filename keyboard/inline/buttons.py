@@ -20,7 +20,6 @@ bot_button = InlineKeyboardMarkup(
     ]
 )
 
-
 confirm_button = InlineKeyboardMarkup(
     inline_keyboard=[
         [
