@@ -31,6 +31,7 @@ async def new_work_start(message: Message, state: FSMContext):
 @router.message(WorkState.work_type)
 async def work_type_handler(message: Message, state: FSMContext):
     await state.update_data(work_type=message.text)
+    await state.update_data(chat_id=message.chat.id)
     await message.answer("🏠 Manzilni kiriting:")
     await state.set_state(WorkState.address)
 
@@ -104,13 +105,16 @@ async def finish_date_handler(message: Message, state: FSMContext):
 async def work_confirm_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
-    success = await create_work(data['work_type'], data['address'], data['client_name'], data['client_phone'],
+    success = await create_work(data['chat_id'], data['work_type'], data['address'], data['client_name'], data['client_phone'],
                                 data['izoh'], data['finish_date'])
     if not success:
-        await callback.message.edit_text("❌ Ish qo'shishda xatolik qayta urunib ko'ring!", reply_markup=work_keyboard())
+        await callback.message.answer("❌ Ish qo'shishda xatolik qayta urunib ko'ring!", reply_markup=work_keyboard())
+        await callback.message.delete()
+
         return
 
-    await callback.message.edit_text("✅ Yangi ish muvaffaqiyatli qo‘shildi!", reply_markup=work_keyboard())
+    await callback.message.answer("✅ Yangi ish muvaffaqiyatli qo‘shildi!", reply_markup=work_keyboard())
+    await callback.message.delete()
     await state.clear()
 
 

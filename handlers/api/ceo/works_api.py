@@ -33,8 +33,9 @@ async def get_works_list():
     return data
 
 
-async def create_work(work_type, address, client_name, client_phone, izoh, finish_date):
+async def create_work(chat_id, work_type, address, client_name, client_phone, izoh, finish_date):
     payload = {
+        "chat_id": chat_id,
         "work_type": work_type,
         "address": address,
         "client_name": client_name,

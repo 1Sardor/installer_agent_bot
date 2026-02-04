@@ -30,9 +30,9 @@ async def statistics_menu(message: Message):
     text += f"📇 Mijozlar: {total_clients}\n\n"
 
     text += "📌 Umumiy ishlar:\n"
-    text += f"   ⏳ Pending: {pending:,}\n"
-    text += f"   🔄 In Progress: {in_progress:,}\n"
-    text += f"   ✅ Completed: {completed:,}\n\n"
+    text += f"   ⏳ Yangi: {pending:,}\n"
+    text += f"   🔄 Bajarilyapti: {in_progress:,}\n"
+    text += f"   ✅ Tugatildi: {completed:,}\n\n"
 
     text += "👤 Xodimlar bo'yicha:\n"
     for user in user_stats:
