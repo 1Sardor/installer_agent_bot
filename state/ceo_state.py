@@ -12,3 +12,16 @@ class EditHodimState(StatesGroup):
     full_name = State()
     chat_id = State()
     status = State()
+
+
+class AddClientState(StatesGroup):
+    full_name = State()
+    phone = State()
+    address = State()
+
+
+class AddRazxodState(StatesGroup):
+    miqdor = State()
+    izoh = State()
+    image = State()
+    is_correct = State()

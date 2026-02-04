@@ -2,7 +2,6 @@ import asyncio
 import logging
 from handlers.public.start import router as public_router
 from handlers.private.ceo import router as ceo_router
-
 from config import dp, bot
 
 

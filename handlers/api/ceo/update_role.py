@@ -46,10 +46,10 @@ async def update_ceo_role():
     if not isinstance(data, list):
         print("Invalid API response:", data)
         return False
-
+    print(data)
     for item in data:
         chat_id = item.get("chat_id")
-        status = item.get("status")
+        status = item.get("status_code")
 
         if chat_id is None or status is None:
             continue

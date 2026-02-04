@@ -39,3 +39,22 @@ def hodim_status_inline_kb():
             ]
         ]
     )
+
+
+def confirm_inline_keyboard():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="✅ Tasdiqlash",
+                    callback_data="razxod_confirm"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="❌ Bekor qilish",
+                    callback_data="razxod_cancel"
+                )
+            ]
+        ]
+    )

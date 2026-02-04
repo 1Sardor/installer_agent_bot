@@ -44,7 +44,6 @@ async def create_user(full_name, chat_id, status):
     return data
 
 
-
 async def update_user(
     user_id: int,
     full_name: str | None = None,

@@ -41,3 +41,23 @@ def hodim_status_keyboard():
         ],
         resize_keyboard=True
     )
+
+
+def client_keyboard():
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="➕ Yangi Klient")],
+            [KeyboardButton(text="📋 Klientlar ro'yxati"), KeyboardButton(text="⬅️ Orqaga")]
+        ],
+        resize_keyboard=True
+    )
+
+
+def razxod_keyboard():
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="➕ Yangi Razxod")],
+            [KeyboardButton(text="📋 Razxodlar ro'yxati"), KeyboardButton(text="⬅️ Orqaga")]
+        ],
+        resize_keyboard=True
+    )
