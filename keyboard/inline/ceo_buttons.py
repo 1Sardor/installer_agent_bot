@@ -58,3 +58,23 @@ def confirm_inline_keyboard():
             ]
         ]
     )
+
+
+def confirm_work_inline_keyboard():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="✅ Tasdiqlash",
+                    callback_data="work_confirm"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="❌ Bekor qilish",
+                    callback_data="work_cancel"
+                )
+            ]
+        ]
+    )
+

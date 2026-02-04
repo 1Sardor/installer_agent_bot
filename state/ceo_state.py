@@ -25,3 +25,14 @@ class AddRazxodState(StatesGroup):
     izoh = State()
     image = State()
     is_correct = State()
+
+
+class WorkState(StatesGroup):
+    work_type = State()
+    address = State()
+    client_name = State()
+    client_phone = State()
+    izoh = State()
+    finish_date = State()
+    is_correct = State()
+
