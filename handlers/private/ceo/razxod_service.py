@@ -1,3 +1,4 @@
+import time
 from aiogram import Router, types
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -32,6 +33,7 @@ async def list_hodimlar(message: Message):
 
         text = (
             f"📌 № <b>{count}</b>\n"
+            f"👤 User: <b>{u.get('user_name', '-')}</b>\n"
             f"👤 Miqdor: <b>{u.get('miqdor', '-'):,}</b>\n"
             f"☎️ Izoh: <b>{u.get('izoh', '-')}</b>\n"
             f"📍 Yaratilgan sana: <b>{u.get('created_at')}</b>\n"
@@ -41,6 +43,7 @@ async def list_hodimlar(message: Message):
             text,
             parse_mode="HTML"
         )
+        time.sleep(0.05)
 
 
 @router.message(lambda m: m.text == "➕ Yangi Razxod")
@@ -64,6 +67,7 @@ async def get_miqdor(message: Message, state: FSMContext):
 @router.message(AddRazxodState.izoh)
 async def get_izoh(message: Message, state: FSMContext):
     await state.update_data(izoh=message.text)
+    await state.update_data(chat_id=message.chat.id)
     await message.answer(
         "🖼 Agar chek/rasm bo‘lsa yuboring.\n"
         "O‘tkazib yuborish uchun 👉 /skip"
@@ -130,7 +134,7 @@ async def confirm_razxod(cb: CallbackQuery, state: FSMContext):
     if data.get("image"):
         image_path = await download_image(data["image"])
 
-    success = await create_razxod(miqdor=data.get("miqdor"), izoh=data.get("izoh"), image=image_path)
+    success = await create_razxod(chat_id=data.get('chat_id'), miqdor=data.get("miqdor"), izoh=data.get("izoh"), image=image_path)
     if not success:
         await cb.message.answer("Xarajat qo'shishda xatolik qayta urunib ko'ring!", reply_markup=razxod_keyboard())
         return

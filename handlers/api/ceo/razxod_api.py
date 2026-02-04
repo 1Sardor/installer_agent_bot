@@ -17,10 +17,11 @@ async def get_razxod_list():
     return data
 
 
-async def create_razxod(miqdor, izoh, image):
+async def create_razxod(chat_id, miqdor, izoh, image):
     async with aiohttp.ClientSession() as session:
         form = aiohttp.FormData()
         form.add_field("miqdor", str(miqdor))
+        form.add_field("chat_id", str(chat_id))
         form.add_field("izoh", izoh)
 
         if image:
