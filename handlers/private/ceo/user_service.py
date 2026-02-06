@@ -209,8 +209,3 @@ async def hodim_delete_cb(call: CallbackQuery):
         await call.message.answer("❌ Hodimni o‘chirishda xatolik yuz berdi")
 
     await call.answer()
-
-
-@router.message(lambda m: m.text == "⬅️ Orqaga")
-async def back_to_main(message: Message):
-    await message.answer("Asosiy menyu:", reply_markup=main_keyboard())

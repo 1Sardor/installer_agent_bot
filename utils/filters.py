@@ -29,9 +29,9 @@ class IsCeo(RoleFilter):
 
 class IsSeller(RoleFilter):
     def __init__(self):
-        super().__init__("ceo")
+        super().__init__("seller")
 
 
 class IsAgent(RoleFilter):
     def __init__(self):
-        super().__init__("ceo")
+        super().__init__("agent")

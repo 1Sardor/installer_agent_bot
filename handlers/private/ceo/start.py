@@ -5,7 +5,6 @@ from aiogram.filters import Command
 from handlers.api.ceo.update_role import update_ceo_role
 from utils.filters import IsCeo
 from keyboard.default.ceo_buttons import main_keyboard
-from keyboard.default.buttons import back_keyboard
 
 router = Router()
 router.message.filter(IsCeo())
@@ -27,7 +26,6 @@ async def start(message: types.Message, state: FSMContext) -> None:
 @router.message(Command("update_users"))
 async def update_ceo_command(message: types.Message):
     success = await update_ceo_role()
-    print(success)
     if success:
         await message.answer("✅ Users roles updated")
     else:
@@ -45,3 +43,10 @@ async def help_command(message: types.Message):
     """
 
     await message.answer(help_text)
+
+
+@router.message(lambda m: m.text == "⬅️ Orqaga")
+async def back_to_main(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Asosiy menyu:", reply_markup=main_keyboard())
+

@@ -5,15 +5,15 @@ from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from handlers.api.ceo.works_api import get_works_list, create_work
+from handlers.api.ceo.works_api import create_work, get_works_list, get_active_works
 from keyboard.default.buttons import back_keyboard
-from keyboard.default.ceo_buttons import work_keyboard
+from keyboard.default.seller_keyboard import work_keyboard, main_keyboard
 from keyboard.inline.ceo_buttons import confirm_work_inline_keyboard
-from state.ceo_state import WorkState
-from utils.filters import IsCeo
+from utils.filters import IsSeller
+from state.seller_state import SellerWorkState
 
 router = Router()
-router.message.filter(IsCeo())
+router.message.filter(IsSeller())
 
 
 @router.message(lambda m: m.text == "💼 Ish")
@@ -25,32 +25,32 @@ async def show_work_menu(message: Message):
 async def new_work_start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("📝 Yangi ish yaratish. \nBirinchi: Ish turini kiriting.", reply_markup=back_keyboard())
-    await state.set_state(WorkState.work_type)
+    await state.set_state(SellerWorkState.work_type)
 
 
-@router.message(WorkState.work_type)
+@router.message(SellerWorkState.work_type)
 async def work_type_handler(message: Message, state: FSMContext):
     await state.update_data(work_type=message.text)
     await state.update_data(chat_id=message.chat.id)
     await message.answer("🏠 Manzilni kiriting:")
-    await state.set_state(WorkState.address)
+    await state.set_state(SellerWorkState.address)
 
 
-@router.message(WorkState.address)
+@router.message(SellerWorkState.address)
 async def address_handler(message: Message, state: FSMContext):
     await state.update_data(address=message.text)
     await message.answer("👤 Mijoz ismi:")
-    await state.set_state(WorkState.client_name)
+    await state.set_state(SellerWorkState.client_name)
 
 
-@router.message(WorkState.client_name)
+@router.message(SellerWorkState.client_name)
 async def client_name_handler(message: Message, state: FSMContext):
     await state.update_data(client_name=message.text)
     await message.answer("📞 Mijoz telefon raqami:")
-    await state.set_state(WorkState.client_phone)
+    await state.set_state(SellerWorkState.client_phone)
 
 
-@router.message(WorkState.client_phone)
+@router.message(SellerWorkState.client_phone)
 async def client_phone_handler(message: Message, state: FSMContext):
     phone = message.text
     if phone.startswith("+998"):
@@ -66,17 +66,17 @@ async def client_phone_handler(message: Message, state: FSMContext):
 
     await state.update_data(client_phone=phone)
     await message.answer("📝 Izoh:")
-    await state.set_state(WorkState.izoh)
+    await state.set_state(SellerWorkState.izoh)
 
 
-@router.message(WorkState.izoh)
+@router.message(SellerWorkState.izoh)
 async def izoh_handler(message: Message, state: FSMContext):
     await state.update_data(izoh=message.text)
     await message.answer("📅 Ish tugash sanasini kiriting (YYYY-MM-DD formatda):")
-    await state.set_state(WorkState.finish_date)
+    await state.set_state(SellerWorkState.finish_date)
 
 
-@router.message(WorkState.finish_date)
+@router.message(SellerWorkState.finish_date)
 async def finish_date_handler(message: Message, state: FSMContext):
     try:
         finish_date = datetime.strptime(message.text, "%Y-%m-%d").date()
@@ -98,10 +98,10 @@ async def finish_date_handler(message: Message, state: FSMContext):
     )
 
     await message.answer(summary, reply_markup=confirm_work_inline_keyboard(), parse_mode="HTML")
-    await state.set_state(WorkState.is_correct)
+    await state.set_state(SellerWorkState.is_correct)
 
 
-@router.callback_query(F.data == "work_confirm", WorkState.is_correct)
+@router.callback_query(F.data == "work_confirm", SellerWorkState.is_correct)
 async def work_confirm_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
@@ -118,7 +118,7 @@ async def work_confirm_handler(callback: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-@router.callback_query(F.data == "work_cancel", WorkState.is_correct)
+@router.callback_query(F.data == "work_cancel", SellerWorkState.is_correct)
 async def work_cancel_handler(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("❌ Jarayon bekor qilindi.")
     await state.clear()
@@ -165,7 +165,6 @@ async def work_list_handler(message: Message):
         user_name = work.get("user_name") or "Biriktirilmagan"
         text += (
             f"<b>{i}. {work['work_type']}</b>\n"
-            f"🆔 ID: <b>{work['id']}</b>\n"
             f"📍 Manzil: <b>{work['address']}</b>\n"
             f"👤 Mijoz: <b>{work['client_name']}</b>\n"
             f"📞 Tel: <b>{work['client_phone']}</b>\n"
@@ -179,3 +178,29 @@ async def work_list_handler(message: Message):
         )
 
     await message.answer(text, parse_mode="HTML")
+
+
+@router.message(F.text == "⚡ Faol Ishlar")
+async def send_active_works(message: Message):
+    works = await get_active_works()
+
+    if not works:
+        await message.answer("✅ Hozirda faol ishlar mavjud emas.")
+        return
+
+    text = "🔄 Hozirda faol ishlar:\n\n"
+
+    for w in works:
+        text += (
+            f"🛠 {w['work_type']}\n"
+            f"   👤 Bajaruvchi: <b>{w.get('user_name', '-')}</b>\n"
+            f"   ✍  Yaratuvchi: <b>{w.get('created_by_name', '-')}</b>\n"
+            f"   🏠 Manzil: <b>{w['address']}</b>\n"
+            f"   📞 Mijoz: <b>{w['client_name']} ({w['client_phone']})</b>\n"
+            f"   ⏳ Yakunlanishi: <b>{w['finish_date']}</b>\n"
+            f"   ⚡  Priority: <b>{get_priority_color(w['finish_date'])}</b>\n"
+            f"   📋 Status: <b>{w['status']}</b>\n"
+            f"   🕒 Yaratilgan: <b>{w['created_at']}</b>\n\n"
+        )
+
+    await message.answer(text, reply_markup=main_keyboard(), parse_mode="HTML")

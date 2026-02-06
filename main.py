@@ -1,14 +1,16 @@
 import asyncio
 import logging
-from handlers.public.start import router as public_router
 from handlers.private.ceo import router as ceo_router
+from handlers.private.seller import router as seller_router
+from handlers.private.agent import router as agent_router
 from config import dp, bot
 
 
 async def main():
     dp.include_routers(
         ceo_router,
-        public_router,
+        agent_router,
+        seller_router,
     )
     await dp.start_polling(bot)
 

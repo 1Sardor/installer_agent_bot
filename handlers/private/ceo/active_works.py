@@ -52,6 +52,7 @@ async def send_active_works(message: Message):
     for w in works:
         text += (
             f"🛠 {w['work_type']}\n"
+            f"   🆔 ID: <b>{w['id']}</b>\n"
             f"   👤 Bajaruvchi: <b>{w.get('user_name', '-')}</b>\n"
             f"   ✍  Yaratuvchi: <b>{w.get('created_by_name', '-')}</b>\n"
             f"   🏠 Manzil: <b>{w['address']}</b>\n"
