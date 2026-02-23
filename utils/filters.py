@@ -35,3 +35,9 @@ class IsSeller(RoleFilter):
 class IsAgent(RoleFilter):
     def __init__(self):
         super().__init__("agent")
+
+
+class IsNotStaff(filters.Filter):
+    async def __call__(self, message: types.Message):
+        user_id = str(message.from_user.id)
+        return user_id not in ROLES and message.chat.type in ['private']

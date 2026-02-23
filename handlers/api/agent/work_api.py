@@ -8,7 +8,7 @@ async def get_active_work_for_agent():
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)
         ) as session:
-            async with session.get(f'{base_url}active-works-for-agent/') as resp:
+            async with session.get(f'{base_url}active-works-for-agent/', ssl=False) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
     except Exception as e:
@@ -24,7 +24,7 @@ async def get_installed_works_list(chat_id, status):
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)
         ) as session:
-            async with session.get(f'{base_url}agent-works/?chat_id={chat_id}&status={status}') as resp:
+            async with session.get(f'{base_url}agent-works/?chat_id={chat_id}&status={status}', ssl=False) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
     except Exception as e:
@@ -45,7 +45,7 @@ async def accept_work(chat_id, work_id):
         ) as session:
             async with session.post(
                 f"{base_url}accept-work/",
-                json=payload
+                json=payload, ssl=False
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
@@ -82,5 +82,5 @@ async def complete_work(chat_id, work_id, document_id, image_id):
                 content_type="application/pdf"
             )
 
-        async with session.post(f'{base_url}complete-work/', data=form) as resp:
+        async with session.post(f'{base_url}complete-work/', data=form, ssl=False) as resp:
             return await resp.json()

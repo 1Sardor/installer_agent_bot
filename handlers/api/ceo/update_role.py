@@ -36,7 +36,7 @@ async def update_ceo_role():
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)
         ) as session:
-            async with session.get(DJANGO_API_CEO) as resp:
+            async with session.get(DJANGO_API_CEO, ssl=False) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
     except Exception as e:

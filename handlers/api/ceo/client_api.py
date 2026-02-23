@@ -7,7 +7,7 @@ async def get_client_list():
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)
         ) as session:
-            async with session.get(f'{base_url}clients/') as resp:
+            async with session.get(f'{base_url}clients/', ssl=False) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
     except Exception as e:
@@ -30,7 +30,7 @@ async def create_client(full_name, phone, address):
         ) as session:
             async with session.post(
                 f"{base_url}clients/",
-                json=payload
+                json=payload, ssl=False
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()

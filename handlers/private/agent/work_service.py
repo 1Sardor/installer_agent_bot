@@ -326,7 +326,8 @@ async def complete_work_finish(callback: types.CallbackQuery, state: FSMContext)
                 f"✅ Ish yakunlandi!\n\n"
                 f"🆔 Ish ID: {work_id}\n"
                 f"📝 Malumotlar saqlandi!\n\n"
-            )
+            , reply_markup=work_keyboard())
+            await callback.message.delete()
             return
         await callback.message.answer("❌ Malumotlarni yuklashda xatolik qayta harakat qilib ko'ring!", reply_markup=work_keyboard())
     else:

@@ -7,7 +7,7 @@ async def get_user_list():
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)
         ) as session:
-            async with session.get(f'{base_url}users/') as resp:
+            async with session.get(f'{base_url}users/', ssl=False) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
     except Exception as e:
@@ -29,7 +29,7 @@ async def create_user(full_name, chat_id, status):
         ) as session:
             async with session.post(
                 f"{base_url}users/",
-                json=payload
+                json=payload, ssl=False
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
@@ -65,7 +65,7 @@ async def update_user(
         ) as session:
             async with session.patch(
                 f"{base_url}users/{user_id}/",
-                json=payload
+                json=payload, ssl=False
             ) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
@@ -83,7 +83,7 @@ async def update_user(
 async def user_delete(obj_id: int):
     try:
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
-            async with session.delete(f"{base_url}users/{obj_id}/") as resp:
+            async with session.delete(f"{base_url}users/{obj_id}/", ssl=False) as resp:
                 if resp.status in (200, 204):
                     return True
                 resp.raise_for_status()
