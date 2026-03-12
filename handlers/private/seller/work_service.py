@@ -72,6 +72,18 @@ async def client_phone_handler(message: Message, state: FSMContext):
 @router.message(SellerWorkState.izoh)
 async def izoh_handler(message: Message, state: FSMContext):
     await state.update_data(izoh=message.text)
+    await message.answer("📅 Ish bajarilish vaqtini kunda kiriting misol uchun (1 yoki 2):")
+    await state.set_state(SellerWorkState.deadline)
+
+
+@router.message(SellerWorkState.deadline)
+async def izoh_handler(message: Message, state: FSMContext):
+    if not message.text.isdigit():
+        await message.answer("❌ Iltimos, faqat raqam kiriting (1 yoki 2):")
+        await state.set_state(SellerWorkState.deadline)
+        return
+        
+    await state.update_data(deadline=message.text)
     await message.answer("📅 Ish tugash sanasini kiriting (YYYY-MM-DD formatda):")
     await state.set_state(SellerWorkState.finish_date)
 
@@ -158,12 +170,10 @@ async def work_list_handler(message: Message):
         await message.answer("📭 Hozircha ishlar mavjud emas.")
         return
 
-    text = "📋 <b>Ishlar ro‘yxati</b>\n\n"
-
     for i, work in enumerate(works, start=1):
         created_by = work.get("created_by_name") or "Biriktirilmagan"
         user_name = work.get("user_name") or "Biriktirilmagan"
-        text += (
+        text = (
             f"<b>{i}. {work['work_type']}</b>\n"
             f"📍 Manzil: <b>{work['address']}</b>\n"
             f"👤 Mijoz: <b>{work['client_name']}</b>\n"
@@ -174,10 +184,19 @@ async def work_list_handler(message: Message):
             f"📅 Tugash: <b>{work['finish_date']}</b>\n"
             f"👨‍💼 Yaratgan: <b>{created_by}</b>\n"
             f"👷 Biriktirilgan: <b>{user_name}</b>\n"
-            f"──────────────\n"
         )
-
-    await message.answer(text, parse_mode="HTML")
+        document_url = work.get("document")
+        if document_url:
+            await message.answer_document(
+                document=document_url,
+                caption=text,
+                parse_mode="HTML"
+            )
+        else:
+            await message.answer(
+                text,
+                parse_mode="HTML"
+            )
 
 
 @router.message(F.text == "⚡ Faol Ishlar")

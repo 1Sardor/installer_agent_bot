@@ -76,6 +76,18 @@ async def client_phone_handler(message: Message, state: FSMContext):
 @router.message(AgentWorkState.izoh)
 async def izoh_handler(message: Message, state: FSMContext):
     await state.update_data(izoh=message.text)
+    await message.answer("📅 Ish bajarilish vaqtini kunda kiriting misol uchun (1 yoki 2):")
+    await state.set_state(AgentWorkState.deadline)
+
+
+@router.message(AgentWorkState.deadline)
+async def izoh_handler(message: Message, state: FSMContext):
+    if not message.text.isdigit():
+        await message.answer("❌ Iltimos, faqat raqam kiriting (1 yoki 2):")
+        await state.set_state(AgentWorkState.deadline)
+        return
+        
+    await state.update_data(deadline=message.text)
     await message.answer("📅 Ish tugash sanasini kiriting (YYYY-MM-DD formatda):")
     await state.set_state(AgentWorkState.finish_date)
 
@@ -254,7 +266,20 @@ async def send_active_works(message: Message, state: FSMContext):
             f"   🕒 Qabul qilingan vaqt: <b>{w['accepted_at']}</b>\n\n"
         )
 
-        await message.answer(text, reply_markup=complete_work_inline_keyboard(w['id']), parse_mode="HTML")
+        document_url = work.get("document")
+        if document_url:
+            await message.answer_document(
+                document=document_url,
+                caption=text,
+                reply_markup=complete_work_inline_keyboard(w['id']),
+                parse_mode="HTML"
+            )
+        else:
+            await message.answer(
+                text,
+                reply_markup=complete_work_inline_keyboard(w['id']),
+                parse_mode="HTML"
+            )
 
 
 @router.callback_query(F.data.startswith("complete_work:"))

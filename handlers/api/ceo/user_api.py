@@ -22,7 +22,7 @@ async def create_user(full_name, chat_id, status):
         "chat_id": chat_id,
         "status": status
     }
-
+    print("status:", status)
     try:
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)

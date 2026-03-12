@@ -108,7 +108,7 @@ async def add_hodim_finish(message: Message, state: FSMContext):
         f"👤 FIO: <b>{full_name}</b>\n"
         f"🆔 Chat Id: <b>{chat_id}</b>\n"
         f"🛡️ Status: <b>{message.text}</b>",
-        reply_markup=hodim_keyboard()
+        reply_markup=hodim_keyboard(), parse_mode="HTML"
     )
 
 

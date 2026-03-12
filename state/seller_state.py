@@ -8,5 +8,6 @@ class SellerWorkState(StatesGroup):
     client_phone = State()
     izoh = State()
     finish_date = State()
+    deadline = State()
     is_correct = State()
 
