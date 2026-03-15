@@ -2,8 +2,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
 import asyncio
 from handlers.api.agent.work_api import get_active_work_for_agent
-from confif import bot
+from config import bot
 import json
+from pytz import timezone
 
 scheduler = AsyncIOScheduler()
 
@@ -75,7 +76,7 @@ def start_scheduler():
     scheduler.add_job(
         send_daily_message,
         "cron",
-        hour=9,
-        minute=0
+        hour=13,
+        minute=50
     )
     scheduler.start()
