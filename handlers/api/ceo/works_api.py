@@ -33,7 +33,39 @@ async def get_works_list():
     return data
 
 
-async def create_work(chat_id, work_type, address, client_name, client_phone, izoh, finish_date):
+async def get_will_be_free():
+
+    try:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=5)
+        ) as session:
+            async with session.get(f'{base_url}will-be-free/', ssl=False) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+    except Exception as e:
+        print("Failed to fetch CEO role from API:", e)
+        return False
+
+    return data
+
+
+async def get_works_types_list():
+
+    try:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=5)
+        ) as session:
+            async with session.get(f'{base_url}works-type/', ssl=False) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+    except Exception as e:
+        print("Failed to fetch CEO role from API:", e)
+        return False
+
+    return data
+
+
+async def create_work(chat_id, work_type, address, client_name, client_phone, izoh, deadline, finish_date):
     payload = {
         "chat_id": chat_id,
         "work_type": work_type,
@@ -41,6 +73,7 @@ async def create_work(chat_id, work_type, address, client_name, client_phone, iz
         "client_name": client_name,
         "client_phone": client_phone,
         "izoh": izoh,
+        "deadline": int(deadline),
         "finish_date": str(finish_date),
     }
     try:

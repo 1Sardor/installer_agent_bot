@@ -1,4 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from handlers.api.ceo.works_api import get_works_types_list
 
 def main_keyboard():
     return ReplyKeyboardMarkup(
@@ -69,5 +70,19 @@ def work_keyboard():
             [KeyboardButton(text="➕ Yangi Ish")],
             [KeyboardButton(text="📋 Ishlar ro'yxati"), KeyboardButton(text="⬅️ Orqaga")]
         ],
+        resize_keyboard=True
+    )
+
+
+async def generate_work_type_buttons():
+    work_types = await get_works_types_list()
+    
+    keyboard = [
+        [KeyboardButton(text=item["name"])]
+        for item in work_types
+    ]
+
+    return ReplyKeyboardMarkup(
+        keyboard=keyboard,
         resize_keyboard=True
     )

@@ -5,10 +5,11 @@ from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
-from handlers.api.ceo.works_api import create_work, get_works_list, get_active_works
+from handlers.api.ceo.works_api import create_work, get_works_list, get_active_works, get_will_be_free, get_works_types_list
 from keyboard.default.buttons import back_keyboard
 from keyboard.default.seller_keyboard import work_keyboard, main_keyboard
 from keyboard.inline.ceo_buttons import confirm_work_inline_keyboard
+from keyboard.default.ceo_buttons import generate_work_type_buttons
 from utils.filters import IsSeller
 from state.seller_state import SellerWorkState
 
@@ -24,15 +25,23 @@ async def show_work_menu(message: Message):
 @router.message(F.text == "➕ Yangi Ish")
 async def new_work_start(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer("📝 Yangi ish yaratish. \nBirinchi: Ish turini kiriting.", reply_markup=back_keyboard())
+    data = await get_will_be_free()
+    await message.answer(f"Note: Agentlar taxminan {data.get('data')} kundan keyin ishlarini tugatadi.\nBirinchi: Ish turini kiriting.", reply_markup=await generate_work_type_buttons())
     await state.set_state(SellerWorkState.work_type)
 
 
 @router.message(SellerWorkState.work_type)
 async def work_type_handler(message: Message, state: FSMContext):
+
+    work_types = await get_works_types_list()
+    if message.text not in [i["name"] for i in work_types]:
+        await message.answer("Ish turini Tanlang.", reply_markup=await generate_work_type_buttons())
+        await state.set_state(SellerWorkState.work_type)
+        return
+
     await state.update_data(work_type=message.text)
     await state.update_data(chat_id=message.chat.id)
-    await message.answer("🏠 Manzilni kiriting:")
+    await message.answer("🏠 Manzilni kiriting:", reply_markup=back_keyboard())
     await state.set_state(SellerWorkState.address)
 
 
@@ -116,9 +125,10 @@ async def finish_date_handler(message: Message, state: FSMContext):
 @router.callback_query(F.data == "work_confirm", SellerWorkState.is_correct)
 async def work_confirm_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-
+    
     success = await create_work(data['chat_id'], data['work_type'], data['address'], data['client_name'], data['client_phone'],
-                                data['izoh'], data['finish_date'])
+                                data['izoh'], data['deadline'], data['finish_date'])
+    
     if not success:
         await callback.message.answer("❌ Ish qo'shishda xatolik qayta urunib ko'ring!", reply_markup=work_keyboard())
         await callback.message.delete()
@@ -182,6 +192,7 @@ async def work_list_handler(message: Message):
             f"⚡  Ustuvorlik: <b>{get_priority_color(work['finish_date'])}</b>\n"
             f"📌 Holat: <b>{work['status']}</b>\n"
             f"📅 Tugash: <b>{work['finish_date']}</b>\n"
+            f"📅 Deadline: <b>{work['deadline']} kun</b>\n"
             f"👨‍💼 Yaratgan: <b>{created_by}</b>\n"
             f"👷 Biriktirilgan: <b>{user_name}</b>\n"
         )
