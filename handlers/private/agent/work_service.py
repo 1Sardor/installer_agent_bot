@@ -277,7 +277,7 @@ async def send_active_works(message: Message, state: FSMContext):
             f"   🕒 Qabul qilingan vaqt: <b>{w['accepted_at']}</b>\n\n"
         )
 
-        document_url = work.get("document")
+        document_url = w.get("document")
         if document_url:
             await message.answer_document(
                 document=document_url,
