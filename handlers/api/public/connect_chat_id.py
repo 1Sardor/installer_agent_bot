@@ -1,16 +1,10 @@
 import aiohttp
 from data.data import base_url
 
-def check_phone(phone):
-    if phone.startswith("+998"):
-        phone = phone.replace("+998", "")
-    elif phone.startswith("998"):
-        phone = phone.replace("998", "")
-    return phone
 
 async def connect_api(phone, chat_id):
     payload = {
-        "phone": check_phone(phone),
+        "phone": phone,
         "chat_id": chat_id,
     }
 
