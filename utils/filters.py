@@ -1,8 +1,13 @@
 from aiogram import filters, types
 import json
 
-with open("data/db.json", "r") as f:
-    ROLES = json.load(f)
+
+def load_roles():
+    try:
+        with open("data/db.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
 
 
 class IsPublic(filters.Filter):
@@ -13,13 +18,14 @@ class IsPublic(filters.Filter):
 
 class RoleFilter(filters.Filter):
     def __init__(self, role: str):
-        self.role = role
+        self.role = role.lower()
 
     async def __call__(self, message: types.Message):
         if message.chat.type != "private":
             return False
-        role = ROLES.get(str(message.chat.id))
-        return role == self.role.lower()
+        roles = load_roles()
+        role = roles.get(str(message.chat.id))
+        return role == self.role
 
 
 class IsCeo(RoleFilter):
@@ -39,5 +45,7 @@ class IsAgent(RoleFilter):
 
 class IsNotStaff(filters.Filter):
     async def __call__(self, message: types.Message):
+
+        roles = load_roles()
         user_id = str(message.from_user.id)
-        return user_id not in ROLES and message.chat.type in ['private']
+        return user_id not in roles and message.chat.type in ['private']
