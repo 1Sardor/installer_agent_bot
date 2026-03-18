@@ -4,7 +4,7 @@ from data.data import base_url
 
 async def connect_api(phone, chat_id):
     payload = {
-        "phone": phone,
+        "phone": phone.replace("+", ""),
         "chat_id": chat_id,
     }
 

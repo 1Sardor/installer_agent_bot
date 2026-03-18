@@ -71,7 +71,7 @@ async def create_work(chat_id, work_type, address, client_name, client_phone, iz
         "work_type": work_type,
         "address": address,
         "client_name": client_name,
-        "client_phone": client_phone,
+        "client_phone": client_phone.replace("+", ""),
         "izoh": izoh,
         "deadline": int(deadline),
         "finish_date": str(finish_date),
