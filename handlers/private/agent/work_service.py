@@ -30,7 +30,7 @@ async def show_work_menu(message: Message, state: FSMContext):
 async def new_work_start(message: Message, state: FSMContext):
     await state.clear()
     data = await get_will_be_free()
-    await message.answer(f"Note: Agentlar taxminan {data.get('data')} kundan keyin ishlarini tugatadi.\nBirinchi: Ish turini kiriting.", reply_markup=await generate_work_type_buttons())
+    await message.answer(f"Eslatma: Agentlar taxminan {data.get('data')} kundan keyin ishlarini tugatadi.\nBirinchi: Ish turini kiriting.", reply_markup=await generate_work_type_buttons())
     await state.set_state(AgentWorkState.work_type)
 
 
@@ -224,7 +224,7 @@ async def send_active_works(message: Message, state: FSMContext):
             f"⏳ Yakunlanishi: <b>{w['finish_date']}</b>\n"
             f"⚡  Priority: <b>{get_priority_color(w['finish_date'])}</b>\n"
             f"📋 Status: <b>{w['status']}</b>\n"
-            f"📋 Deadline: <b>{w['deadline']} kun</b>\n"
+            f"📋 Topshirish muddati: <b>{w['deadline']} kun</b>\n"
             f"🕒 Yaratilgan: <b>{w['created_at']}</b>\n\n"
         )
         await message.answer(text, reply_markup=accept_work_inline_keyboard(w['id']), parse_mode="HTML")
@@ -267,7 +267,7 @@ async def send_active_works(message: Message, state: FSMContext):
             f"   ⏳ Yakunlanishi: <b>{w['finish_date']}</b>\n"
             f"   ⚡  Priority: <b>{get_priority_color(w['finish_date'])}</b>\n"
             f"   📋 Status: <b>{w['status']}</b>\n"
-            f"   📋 Deadline: <b>{w['deadline']} kun</b>\n"
+            f"   📋 Topshirish muddati: <b>{w['deadline']} kun</b>\n"
             f"   🕒 Yaratilgan: <b>{w['created_at']}</b>\n"
             f"   🕒 Qabul qilingan vaqt: <b>{w['accepted_at']}</b>\n\n"
         )

@@ -25,7 +25,7 @@ async def show_work_menu(message: Message):
 async def new_work_start(message: Message, state: FSMContext):
     await state.clear()
     data = await get_will_be_free()
-    await message.answer(f"Note: Agentlar taxminan {data.get('data')} kundan keyin ishlarini tugatadi.\nBirinchi: Ish turini kiriting.", reply_markup=await generate_work_type_buttons())
+    await message.answer(f"Eslatma: Agentlar taxminan {data.get('data')} kundan keyin ishlarini tugatadi.\nBirinchi: Ish turini kiriting.", reply_markup=await generate_work_type_buttons())
     await state.set_state(WorkState.work_type)
 
 
@@ -185,7 +185,7 @@ async def work_list_handler(message: Message):
             f"⚡  Ustuvorlik: <b>{get_priority_color(work['finish_date'])}</b>\n"
             f"📌 Holat: <b>{work['status']}</b>\n"
             f"📅 Tugash: <b>{work['finish_date']}</b>\n"
-            f"📅 Deadline: <b>{work['deadline']} kun</b>\n"
+            f"📅 Topshirish muddati: <b>{work['deadline']} kun</b>\n"
             f"👨‍💼 Yaratgan: <b>{created_by}</b>\n"
             f"👷 Biriktirilgan: <b>{user_name}</b>\n"
         )
