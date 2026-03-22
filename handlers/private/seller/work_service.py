@@ -55,7 +55,7 @@ async def address_handler(message: Message, state: FSMContext):
 @router.message(SellerWorkState.client_name)
 async def client_name_handler(message: Message, state: FSMContext):
     await state.update_data(client_name=message.text)
-    await message.answer("📞 Mijoz telefon raqami:")
+    await message.answer("📞 Mijoz telefon raqami: \nNa'muna: 991234567")
     await state.set_state(SellerWorkState.client_phone)
 
 
