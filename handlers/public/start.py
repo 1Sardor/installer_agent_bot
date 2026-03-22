@@ -44,7 +44,7 @@ async def start(message: types.Message, state: FSMContext) -> None:
 
 @router.message(RegisterState.waiting_phone, F.contact)
 async def phone_handler(message: types.Message, state: FSMContext):
-    phone = message.contact.phone_number
+    phone = message.contact.phone_number.replace(" ", "").replace("+", "")
 
     user = await connect_api(phone, message.chat.id)
 
