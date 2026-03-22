@@ -62,9 +62,9 @@ async def client_name_handler(message: Message, state: FSMContext):
 @router.message(SellerWorkState.client_phone)
 async def client_phone_handler(message: Message, state: FSMContext):
     phone = message.text.replace(" ", "").replace("+", "")
-    if not phone.isdigit() and len(phone) != 12:
+    if not phone.isdigit() or len(phone) != 9:
         await message.answer(
-            "❌ Telefon raqam noto‘g‘ri. Format: 998991234567. Qaytadan kiriting:"
+            "❌ Telefon raqam noto‘g‘ri. Format: 991234567. Qaytadan kiriting:"
         )
         return
 
