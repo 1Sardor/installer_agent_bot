@@ -73,7 +73,6 @@ async def complete_work(chat_id, work_id, document_id, image_id):
                 content_type="image/jpeg"
             )
 
-
         if document_id:
             form.add_field(
                 "document",

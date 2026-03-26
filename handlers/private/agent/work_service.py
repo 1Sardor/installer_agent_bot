@@ -5,6 +5,7 @@ from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 
+from config import bot
 from handlers.api.agent.work_api import get_installed_works_list, get_active_work_for_agent, accept_work, complete_work
 from handlers.api.ceo.works_api import create_work, get_will_be_free, get_works_types_list
 from handlers.views import download_image
@@ -320,11 +321,26 @@ async def complete_work_document(message: types.Message, state: FSMContext):
 
 @router.message(CompleteWorkState.image, F.photo)
 async def complete_work_image(message: types.Message, state: FSMContext):
-    photo_id = message.photo[-1].file_id
-    await state.update_data(image_id=photo_id)
+    data = await state.get_data()
 
+    photos = data.get("images", [])
+    photos.append(message.photo[-1].file_id)
+
+    await state.update_data(images=photos)
+
+    await message.answer(
+        f"✅ Rasm qo‘shildi ({len(photos)} ta)\n\nYana rasm yuboring yoki /done bosing"
+    )
+
+
+@router.message(CompleteWorkState.image, F.text == "/done")
+async def finish_images(message: types.Message, state: FSMContext):
     await state.set_state(CompleteWorkState.explain)
-    await message.answer("✍️ Ish bo‘yicha mijozga tushuncha berdingizmi?", reply_markup=ha_yoq_keyboard())
+
+    await message.answer(
+        "✍️ Ish bo‘yicha mijozga tushuncha berdingizmi?",
+        reply_markup=ha_yoq_keyboard()
+    )
 
 
 @router.message(CompleteWorkState.image, F.text == "/skip")
@@ -343,15 +359,24 @@ async def complete_work_finish(callback: types.CallbackQuery, state: FSMContext)
         work_id = data.get("work_id")
         chat_id = data.get("chat_id")
 
-        image_path = None
-        if data.get("image_id"):
-            image_path = await download_image(data["image_id"])
+        image_paths = data.get("images")
 
         document_path = None
         if data.get("document_id"):
             document_path = await download_image(data["document_id"])
 
-        success = await complete_work(chat_id=chat_id, work_id=work_id, document_id=document_path, image_id=image_path)
+        success = await complete_work(chat_id=chat_id, work_id=work_id, document_id=document_path, image_id=image_paths)
+
+        for i in image_paths:
+            chat_id=-1002255011625
+            message_thread_id="1284"
+            await bot.send_photo(
+                chat_id=chat_id,
+                photo=i,
+                caption="📸 Rasm",
+                message_thread_id=message_thread_id
+            )
+
         if success:
             await callback.message.answer(
                 f"✅ Ish yakunlandi!\n\n"
