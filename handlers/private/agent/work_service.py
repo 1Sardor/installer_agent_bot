@@ -365,7 +365,7 @@ async def complete_work_finish(callback: types.CallbackQuery, state: FSMContext)
         if data.get("document_id"):
             document_path = await download_image(data["document_id"])
 
-        success = await complete_work(chat_id=chat_id, work_id=work_id, document_id=document_path, image_id=image_paths)
+        success = await complete_work(chat_id=chat_id, work_id=work_id, document_id=document_path)
 
         for i in image_paths:
             chat_id=-1002255011625

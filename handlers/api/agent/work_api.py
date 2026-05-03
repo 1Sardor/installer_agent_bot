@@ -59,19 +59,11 @@ async def accept_work(chat_id, work_id):
     return data
 
 
-async def complete_work(chat_id, work_id, document_id, image_id):
+async def complete_work(chat_id, work_id, document_id):
     async with aiohttp.ClientSession() as session:
         form = aiohttp.FormData()
         form.add_field("work_id", str(work_id))
         form.add_field("chat_id", str(chat_id))
-
-        if image_id:
-            form.add_field(
-                "image",
-                open(image_id, "rb"),
-                filename=f"complated_work_image.jpg",
-                content_type="image/jpeg"
-            )
 
         if document_id:
             form.add_field(
