@@ -1,10 +1,11 @@
 import aiohttp
 from data.data import base_url
 
-async def save_rating(client_id, rating, work_id):
+async def save_rating(client_id, rating, standard_answer, work_id):
     payload = {
         "client_id": client_id,
         "rating": rating,
+        "standard_answer": standard_answer,
         "work_id": work_id,
     }
 

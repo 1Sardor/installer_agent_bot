@@ -1,13 +1,11 @@
 from aiogram import Router, types, filters
 from aiogram.fsm.context import FSMContext
 from aiogram import F
-from aiogram.types import FSInputFile
 
 from handlers.api.public.has_unrated_work import get_unrated_work
-from keyboard.default.public_buttons import phone_button
+from keyboard.default.public_buttons import phone_button, main_markup, standard_keyboard, satisfaction_keyboard
 from utils.filters import IsNotStaff
-from state.public_state import RegisterState
-from keyboard.inline.public_button import rating_keyboard
+from state.public_state import RegisterState, RatingState
 from handlers.api.public.check_client import get_client
 from handlers.api.public.connect_chat_id import connect_api
 from handlers.api.public.rate import save_rating
@@ -20,26 +18,33 @@ router.message.filter(IsNotStaff())
 async def start(message: types.Message, state: FSMContext) -> None:
     checked = await get_client(message.chat.id)
     if checked:
-        await message.answer('Assalomu alaykum Adnis botiga hush kelibsiz!')
+        await message.answer('Assalomu alaykum Adnis botiga hush kelibsiz!', reply_markup=main_markup())
 
         unrated_work = await get_unrated_work(message.chat.id)
 
         if unrated_work:
-            for w in unrated_work:
-                text = f"№: #{w['id']}\nIsh turi: {w['work_type']}\n\nIltimos ishni baxolang!"
-                if w['document']:
-                    await message.answer_document(
-                        document=w['document'],
-                        caption=text,
-                        reply_markup=rating_keyboard(w['id'])
-                    )
-                else:
-                    await message.answer(text, reply_markup=rating_keyboard(w['id']))
+            work = unrated_work[0]
+            await state.update_data(unrated_works=unrated_work, current_index=0)
+            await ask_standard_question(message, state, work)
         return
+
     await message.answer(
         'Assalomu alaykum Adnis botiga hush kelibsiz!\nBotdan foydalanish uchun telefon raqamingizni yuboring!',
         reply_markup=phone_button())
     await state.set_state(RegisterState.waiting_phone)
+
+
+async def ask_standard_question(message: types.Message, state: FSMContext, work: dict):
+    text = (
+        f"№: #{work['id']}\nIsh turi: {work['work_type']}\nAgent: {work.get('user_name', 'N/A')}\n\n"
+        f"1. Ishlarni to'liq holatda Eslatmalar xatida ko'rsatilgan "
+        f"Standartlar bo'yicha ishingizni topshirib berdimi?"
+    )
+    if work.get('document'):
+        await message.answer_document(document=work['document'], caption=text, reply_markup=standard_keyboard())
+    else:
+        await message.answer(text, reply_markup=standard_keyboard())
+    await state.set_state(RatingState.waiting_standard)
 
 
 @router.message(RegisterState.waiting_phone, F.contact)
@@ -54,39 +59,56 @@ async def phone_handler(message: types.Message, state: FSMContext):
         await message.answer("❌ Sizning raqamingiz bazada topilmadi.")
         await state.clear()
         return
-    else:
-        await message.answer("✅ Siz muvoffaqqiyatli royhatdan o'tdingiz!")
+
+    await message.answer("✅ Siz muvoffaqqiyatli royhatdan o'tdingiz!", reply_markup=main_markup())
 
     unrated_work = await get_unrated_work(message.chat.id)
 
     if unrated_work:
-        for w in unrated_work:
-            text = f"№: #{w['id']}\nIsh turi: {w['work_type']}\n\nIltimos ishni baxolang!"
-            if w['document']:
-                await message.answer_document(
-                    document=w['document'],
-                    caption=text,
-                    reply_markup=rating_keyboard(w['id'])
-                )
-            else:
-                await message.answer(text, reply_markup=rating_keyboard(w['id']))
+        work = unrated_work[0]
+        await state.update_data(unrated_works=unrated_work, current_index=0)
+        await ask_standard_question(message, state, work)
+        return
 
     await state.clear()
 
 
-@router.callback_query(
-    F.data.startswith("rate_")
-)
-async def rating_callback(callback: types.CallbackQuery, state: FSMContext):
-    rating = int(callback.data.split("_")[1])
-    work_id = int(callback.data.split("_")[2])
-    client_id = callback.from_user.id
-
-    await save_rating(client_id=client_id, rating=rating, work_id=work_id)
-
-    await callback.message.edit_caption(
-        caption=f"✅ Rahmat! Siz {rating} ⭐ baho berdingiz."
+@router.message(RatingState.waiting_standard, F.text.in_(["✅ HA", "❌ YOQ"]))
+async def standard_handler(message: types.Message, state: FSMContext):
+    await state.update_data(standard_answer=message.text)
+    await message.answer(
+        "2. Installerimiz xizmatidan mamnunmisiz?",
+        reply_markup=satisfaction_keyboard()
     )
+    await state.set_state(RatingState.waiting_satisfaction)
 
-    await callback.answer()
-    await state.clear()
+
+@router.message(RatingState.waiting_satisfaction, F.text.in_(["👎 Yoqmadi", "👍 O'rtacha", "🌟 A'lo"]))
+async def satisfaction_handler(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    unrated_works = data.get("unrated_works", [])
+    current_index = data.get("current_index", 0)
+    standard_answer = data.get("standard_answer", "")
+
+    satisfaction_map = {"👎 Yoqmadi": 1, "👍 O'rtacha": 3, "🌟 A'lo": 5}
+    rating = satisfaction_map[message.text]
+
+    work = unrated_works[current_index]
+    await save_rating(client_id=message.chat.id, standard_answer=standard_answer, rating=rating, work_id=work['id'])
+
+    await message.answer("✅ Rahmat! Bahoyingiz qabul qilindi.", reply_markup=main_markup())
+
+    next_index = current_index + 1
+    if next_index < len(unrated_works):
+        await state.update_data(current_index=next_index)
+        await ask_standard_question(message, state, unrated_works[next_index])
+    else:
+        await state.clear()
+
+
+@router.message(F.text == "📞 Kontakt")
+async def contact_handler(message: types.Message):
+    await message.answer(
+        "👤 CEO: Adnis Islombek\n"
+        "📲 Telegram: @Adnis_Islombek"
+    )
