@@ -32,15 +32,30 @@ async def new_work_start(message: Message, state: FSMContext):
 
 @router.message(SellerWorkState.work_type)
 async def work_type_handler(message: Message, state: FSMContext):
-
     work_types = await get_works_types_list()
-    if message.text not in [i["name"] for i in work_types]:
+    selected = next((i for i in work_types if i["name"] == message.text), None)
+    print(selected)
+    if not selected:
         await message.answer("Ish turini Tanlang.", reply_markup=await generate_work_type_buttons())
         await state.set_state(SellerWorkState.work_type)
         return
 
-    await state.update_data(work_type=message.text)
-    await state.update_data(chat_id=message.chat.id)
+    await state.update_data(work_type=message.text, chat_id=message.chat.id, score_by_count=selected.get("score_by_count", False))
+
+    if selected.get("score_by_count"):
+        await message.answer("🔢 Ish sonini kiriting:", reply_markup=back_keyboard())
+        await state.set_state(SellerWorkState.count)
+    else:
+        await message.answer("🏠 Manzilni kiriting:", reply_markup=back_keyboard())
+        await state.set_state(SellerWorkState.address)
+
+
+@router.message(SellerWorkState.count)
+async def count_handler(message: Message, state: FSMContext):
+    if not message.text.isdigit():
+        await message.answer("❌ Iltimos, faqat raqam kiriting:")
+        return
+    await state.update_data(count=message.text)
     await message.answer("🏠 Manzilni kiriting:", reply_markup=back_keyboard())
     await state.set_state(SellerWorkState.address)
 
@@ -102,15 +117,17 @@ async def finish_date_handler(message: Message, state: FSMContext):
     await state.update_data(finish_date=finish_date)
 
     data = await state.get_data()
+    count_line = f"Soni: <b>{data['count']}</b>\n" if data.get("count") else ""
     summary = (
         f"✅ Iltimos ma’lumotlarni tasdiqlang:\n"
         f"Ish turi: <b>{data['work_type']}</b>\n"
+        f"{count_line}"
         f"Manzil: <b>{data['address']}</b>\n"
         f"Mijoz ismi: <b>{data['client_name']}</b>\n"
         f"Mijoz telefoni: <b>{data['client_phone']}</b>\n"
         f"Izoh: <b>{data['izoh']}</b>\n"
         f"Tugash sanasi: <b>{data['finish_date']}</b>\n\n"
-        f"Ha bo‘lsa ✅, Yo‘q bo‘lsa ❌"
+        f"Ha bo’lsa ✅, Yo’q bo’lsa ❌"
     )
 
     await message.answer(summary, reply_markup=confirm_work_inline_keyboard(), parse_mode="HTML")
@@ -120,9 +137,9 @@ async def finish_date_handler(message: Message, state: FSMContext):
 @router.callback_query(F.data == "work_confirm", SellerWorkState.is_correct)
 async def work_confirm_handler(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    
+
     success = await create_work(data['chat_id'], data['work_type'], data['address'], data['client_name'], data['client_phone'],
-                                data['izoh'], data['deadline'], data['finish_date'])
+                                data['izoh'], data['deadline'], data['finish_date'], data.get('count'))
     
     if not success:
         await callback.message.answer("❌ Ish qo'shishda xatolik qayta urunib ko'ring!", reply_markup=work_keyboard())

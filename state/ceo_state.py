@@ -29,6 +29,7 @@ class AddRazxodState(StatesGroup):
 
 class WorkState(StatesGroup):
     work_type = State()
+    count = State()
     address = State()
     client_name = State()
     client_phone = State()

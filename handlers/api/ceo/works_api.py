@@ -65,7 +65,7 @@ async def get_works_types_list():
     return data
 
 
-async def create_work(chat_id, work_type, address, client_name, client_phone, izoh, deadline, finish_date):
+async def create_work(chat_id, work_type, address, client_name, client_phone, izoh, deadline, finish_date, count=None):
     payload = {
         "chat_id": chat_id,
         "work_type": work_type,
@@ -76,6 +76,8 @@ async def create_work(chat_id, work_type, address, client_name, client_phone, iz
         "deadline": int(deadline),
         "finish_date": str(finish_date),
     }
+    if count is not None:
+        payload["count"] = int(count)
     try:
         async with aiohttp.ClientSession(
             timeout=aiohttp.ClientTimeout(total=5)
