@@ -90,7 +90,7 @@ async def satisfaction_handler(message: types.Message, state: FSMContext):
     current_index = data.get("current_index", 0)
     standard_answer = data.get("standard_answer", "")
 
-    satisfaction_map = {"👎 Yoqmadi": 1, "👍 O'rtacha": 3, "🌟 A'lo": 5}
+    satisfaction_map = {"👎 Yoqmadi": -5, "👍 O'rtacha": 0, "🌟 A'lo": 1}
     rating = satisfaction_map[message.text]
 
     work = unrated_works[current_index]
