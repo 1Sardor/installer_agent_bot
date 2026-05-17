@@ -376,22 +376,22 @@ async def complete_work_finish(callback: types.CallbackQuery, state: FSMContext)
         chat_id = data.get("chat_id")
 
         image_paths = data.get("images")
-
         document_path = None
         if data.get("document_id"):
             document_path = await download_image(data["document_id"])
 
         success = await complete_work(chat_id=chat_id, work_id=work_id, document_id=document_path)
 
-        for i in image_paths:
-            chat_id=-1002255011625
-            message_thread_id="1284"
-            await bot.send_photo(
-                chat_id=chat_id,
-                photo=i,
-                caption="📸 Rasm",
-                message_thread_id=message_thread_id
-            )
+        if image_paths:
+            for i in image_paths:
+                chat_id=-1002255011625
+                message_thread_id="1284"
+                await bot.send_photo(
+                    chat_id=chat_id,
+                    photo=i,
+                    caption="📸 Rasm",
+                    message_thread_id=message_thread_id
+                )
 
         if success:
             await callback.message.answer(
